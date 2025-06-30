@@ -78,18 +78,18 @@ int send_tcp_data(const char *data)
 
   sprintf(cmd, "AT+CIPSEND=%d", strlen(data));
 
-  // 先发送长度指�??
+  // 先发送长度指令
   send_AT_command(cmd);
 
-  // 等待 '>' 提示�??
+  // 等待 '>' 提示符
   if (!wait_for_response(">", 1000))
     return 0;
 
   HAL_Delay(100);
-  // 发�?�实际数�??
+  // 发送实际数据
   HAL_UART_Transmit(&huart3, (uint8_t *)data, strlen(data), HAL_MAX_DELAY);
 
-  // 等待发�?�完成确�??
+  // 等待发送完成
   if (!wait_for_response("SEND OK", 2000))
     return 0;
 
@@ -105,7 +105,7 @@ void send_AT_command(const char *command)
 int wait_for_response(const char *expected_response, uint32_t timeout)
 {
   uint32_t tickstart = HAL_GetTick();
-  uint16_t check_pos = 0; // 上次缓冲区检查到的位�??
+  uint16_t check_pos = 0; // 上次缓冲区检查到的位置
 
   while ((HAL_GetTick() - tickstart) < timeout)
   {
@@ -127,7 +127,7 @@ int wait_for_response(const char *expected_response, uint32_t timeout)
 
       if (strstr(temp_buffer, expected_response) != NULL)
       {
-        return 1; // 找到�???
+        return 1; // 找到预期响应
       }
 
       check_pos = uart3_rx_head; // 更新位置继续等待
@@ -154,7 +154,7 @@ void handle_uart1_input()
       {
         input_line[input_pos] = '\0';
 
-        // 直接发�?�输入的内容，不用判断前�??
+        // 直接发送输入的内容，不用判断前缀
         send_tcp_data(input_line);
         input_pos = 0;
       }
@@ -244,7 +244,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    handle_uart1_input();    // 处理上位机命�??
+    handle_uart1_input();    // 处理上位机命令
     handle_uart3_response(); // 处理ESP8266响应
     /* USER CODE END WHILE */
 
