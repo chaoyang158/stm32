@@ -226,7 +226,7 @@ int main(void)
       HAL_Delay(1000);
     }
   }
-
+  
   send_AT_command("AT+CIPDINFO=1");
   HAL_Delay(500);
 
