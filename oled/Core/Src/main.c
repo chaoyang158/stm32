@@ -88,7 +88,14 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-
+  uint8_t A[] = "hello world!";
+  //初始化oled屏幕
+  OLED_Init();
+  //开启OLED显示
+  OLED_Display_On();
+  //清屏
+  OLED_Clear();
+  OLED_ShowString(0, 0, A, sizeof(A));
   /* USER CODE END 2 */
 
   /* Infinite loop */
