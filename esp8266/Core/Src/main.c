@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -198,6 +199,15 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
+  MX_I2C1_Init();
+  uint8_t A[]="TCP connected!!";
+  //初始化oled屏幕
+  OLED_Init();
+	//开启OLED显示    
+	OLED_Display_On();
+	//清屏
+	OLED_Clear();
+	
   /* USER CODE BEGIN 2 */
 
   send_AT_command("AT+CWJAP=\"WHLD\",\"WHLDADMIN\"");
@@ -214,6 +224,7 @@ int main(void)
     if (connected)
     {
       HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
+      OLED_ShowString(0,0,A,sizeof(A));
     }
     else
     {
@@ -244,7 +255,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    handle_uart1_input();    // 处理上位机命令
+    handle_uart1_input();    // 处理上位机命�?
     handle_uart3_response(); // 处理ESP8266响应
     /* USER CODE END WHILE */
 
