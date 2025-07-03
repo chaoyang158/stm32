@@ -62,6 +62,12 @@ void uart3_send(const char *data)
 void handle_uart3_response()
 {
   static uint16_t last_head = 0;
+  static char temp_buffer[256];
+  static int temp_pos = 0;
+
+  static int expected_length = -1; // -1表示没开始接收
+  static char tcp_payload[128];
+  static int tcp_payload_pos = 0;
 
   while (last_head != uart3_rx_head)
   {
@@ -69,7 +75,71 @@ void handle_uart3_response()
     if (last_head >= UART3_RX_BUFFER_SIZE)
       last_head = 0;
 
-    HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 10);
+    HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 10); // 原样转发
+
+    // 收集到临时缓存
+    if (temp_pos < sizeof(temp_buffer) - 1)
+    {
+      temp_buffer[temp_pos++] = ch;
+      temp_buffer[temp_pos] = '\0';
+    }
+    else
+    {
+      temp_pos = 0;
+    }
+
+    // 如果还没识别出+IPD
+    if (expected_length == -1)
+    {
+      char *ipd_ptr = strstr(temp_buffer, "+IPD,");
+      if (ipd_ptr)
+      {
+        // 查找冒号
+        char *colon = strchr(ipd_ptr, ':');
+        if (colon)
+        {
+          // 解析长度字段
+          int len = 0;
+          sscanf(ipd_ptr + 5, "%d", &len);
+
+          expected_length = len;
+          tcp_payload_pos = 0;
+
+          // 如果冒号后已经带了部分数据
+          // int already_have = temp_pos - (colon - temp_buffer + 1);
+          // if (already_have > 0)
+          // {
+          //   for (int i = 0; i < already_have && tcp_payload_pos < sizeof(tcp_payload) - 1; i++)
+          //   {
+          //     tcp_payload[tcp_payload_pos++] = colon[1 + i];
+          //   }
+          // }
+        }
+      }
+    }
+    else
+    {
+      // 正在接收数据正文
+      if (tcp_payload_pos < expected_length)
+      {
+        tcp_payload[tcp_payload_pos++] = ch;
+      }
+
+      // 收满了
+      if (tcp_payload_pos >= expected_length)
+      {
+        tcp_payload[tcp_payload_pos] = '\0';
+
+        // 显示到OLED
+        OLED_Clear();
+        OLED_ShowString(0, 0, (uint8_t *)tcp_payload, strlen(tcp_payload));
+
+        // 清理
+        expected_length = -1;
+        temp_pos = 0;
+        memset(temp_buffer, 0, sizeof(temp_buffer));
+      }
+    }
   }
 }
 
@@ -142,7 +212,7 @@ void handle_uart1_input()
 {
   static char input_line[UART1_RX_BUFFER_SIZE];
   static int input_pos = 0;
-
+  static int oled_current_line = 0;
   while (command_index != uart1_rx_head)
   {
     char ch = uart1_rx_buffer[command_index++];
@@ -201,7 +271,6 @@ int main(void)
   MX_USART3_UART_Init();
   MX_I2C1_Init();
   uint8_t A[] = "TCP connected!!";
-  uint8_t B[] = "已连接！";
   // 初始化oled屏幕
   OLED_Init();
   // 开启OLED显示
@@ -227,6 +296,8 @@ int main(void)
     {
       HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
       OLED_ShowString(0, 0, A, sizeof(A));
+      HAL_Delay(5000);
+      OLED_Clear();
     }
     else
     {

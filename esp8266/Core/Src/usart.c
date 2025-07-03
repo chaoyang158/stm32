@@ -21,8 +21,6 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-#define UART1_RX_BUFFER_SIZE 128
-#define UART3_RX_BUFFER_SIZE 256
 uint8_t uart1_rx_buffer[UART1_RX_BUFFER_SIZE];
 uint8_t uart3_rx_buffer[UART3_RX_BUFFER_SIZE];
 uint8_t uart1_rx_byte;
