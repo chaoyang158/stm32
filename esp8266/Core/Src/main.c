@@ -201,6 +201,7 @@ int main(void)
   MX_USART3_UART_Init();
   MX_I2C1_Init();
   uint8_t A[] = "TCP connected!!";
+  uint8_t B[] = "已连接！";
   // 初始化oled屏幕
   OLED_Init();
   // 开启OLED显示
@@ -210,6 +211,7 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
+  send_AT_command("ATE0");
   send_AT_command("AT+CWJAP=\"WHLD\",\"WHLDADMIN\"");
   HAL_Delay(2000);
 
@@ -219,7 +221,7 @@ int main(void)
   int connected = 0;
   while (!connected)
   {
-    send_AT_command("AT+CIPSTART=\"TCP\",\"192.168.50.221\",81");
+    send_AT_command("AT+CIPSTART=\"TCP\",\"192.168.50.187\",81");
     connected = wait_for_response("OK", 5000);
     if (connected)
     {
@@ -255,7 +257,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    handle_uart1_input();    // 处理上位机命�?
+    handle_uart1_input();    // 处理上位机命令
     handle_uart3_response(); // 处理ESP8266响应
     /* USER CODE END WHILE */
 

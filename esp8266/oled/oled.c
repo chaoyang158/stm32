@@ -2,7 +2,7 @@
 #include "oledfont.h"
 
 // 几个变量声明
-uint8_t **Hzk;
+// uint8_t **Hzk;
 
 // 初始化命令
 uint8_t CMD_Data[] = {
@@ -111,7 +111,7 @@ void OLED_ShowChar(uint8_t x, uint8_t y, uint8_t chr, uint8_t Char_Size)
   if (x > 128 - 1)
   {
     x = 0;
-    y = y + 2;
+    y = y + 2; //16像素的字体需要两页
   }
   if (Char_Size == 16)
   {
@@ -180,12 +180,12 @@ void OLED_ShowCHinese(uint8_t x, uint8_t y, uint8_t no)
   for (t = 0; t < 16; t++)
   {
     OLED_WR_DATA(Hzk[2 * no][t]);
-    adder += 1;
+    // adder += 1;
   }
   OLED_Set_Pos(x, y + 1);
   for (t = 0; t < 16; t++)
   {
     OLED_WR_DATA(Hzk[2 * no + 1][t]);
-    adder += 1;
+    // adder += 1;
   }
 }
