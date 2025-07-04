@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "i2c.h"
 #include "gpio.h"
 
@@ -86,6 +87,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   uint8_t A[] = "hello world!";
@@ -96,12 +98,21 @@ int main(void)
   //清屏
   OLED_Clear();
   OLED_ShowString(0, 0, A, sizeof(A));
+  OLED_Refresh_DMA();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    HAL_Delay(1000);
+    static uint32_t counter = 0;
+    counter++;
+
+    OLED_Clear();
+    OLED_ShowString(30, 2, (uint8_t *)"Counter", 16);
+    OLED_ShowNum(25, 4, counter, 5, 16);
+    OLED_Refresh_DMA();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
